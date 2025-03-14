@@ -1,5 +1,5 @@
-const Coupon = require('../models/Coupon');
-const User = require('../models/User');
+const Coupon = require('../models/couponModel');
+const User = require('../models/userModel');
 
 const getCoupons = async (req, res) => {
     try {
