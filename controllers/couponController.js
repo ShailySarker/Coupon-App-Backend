@@ -1,7 +1,7 @@
-import Coupon from "../models/Coupon";
-import User from "../models/User";
+const Coupon = require('../models/Coupon');
+const User = require('../models/User');
 
-export const getCoupons = async (req, res) => {
+const getCoupons = async (req, res) => {
     try {
         const coupons = await Coupon.find();
         res.json(coupons);
@@ -10,7 +10,7 @@ export const getCoupons = async (req, res) => {
     }
 };
 
-export const claimCoupon = async (req, res) => {
+const claimCoupon = async (req, res) => {
     const { ipAddress } = req;
     try {
         // Check if the user has claimed a coupon recently
@@ -42,4 +42,9 @@ export const claimCoupon = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Error claiming coupon" });
     }
+};
+
+module.exports = {
+    getCoupons,
+    claimCoupon
 };
