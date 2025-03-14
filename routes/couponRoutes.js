@@ -5,6 +5,6 @@ const { claimCoupon, getCoupons}  = require('../controllers/couponController');
 const { trackUser}  = require('../middleware/abusePrevention');
 
 router.get("/", getCoupons);
-router.post("/claim", trackUser, claimCoupon);
+router.post("/:id/claim", trackUser, claimCoupon);
 
 module.exports = router;

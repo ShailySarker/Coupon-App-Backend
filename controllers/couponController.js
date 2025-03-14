@@ -11,38 +11,43 @@ const getCoupons = async (req, res) => {
 };
 
 const claimCoupon = async (req, res) => {
-    const { ipAddress } = req;
+    const { id } = req.params; // Coupon ID
+    const { ipAddress } = req; // User's IP address
+    
     try {
-        // Check if the user has claimed a coupon recently
-        const user = await User.findOne({ ipAddress });
-        if (user && user.lastClaimed && Date.now() - user.lastClaimed < 3600000) {
-            return res.status(400).json({ message: "You can claim another coupon in an hour." });
-        }
+        const coupon = await Coupon.findById(id);
 
-        // Find the next available coupon
-        const coupon = await Coupon.findOne({ claimedBy: null });
         if (!coupon) {
-            return res.status(404).json({ message: "No coupons available." });
+            return res.status(404).json({ message: "Coupon not found." });
         }
 
-        // Assign the coupon to the user
-        coupon.claimedBy = user?._id || null;
+        if (coupon.claimedBy) {
+            return res.status(400).json({ message: "Coupon already claimed." });
+        }
+
+        // Find the user by IP address or create one
+        let user = await User.findOne({ ipAddress });
+        if (!user) {
+            user = await User.create({ ipAddress, lastClaimed: new Date() });
+        }
+
+        // Assign the user's ObjectId to claimedBy
+        coupon.claimedBy = user._id;
         coupon.claimedAt = new Date();
         await coupon.save();
 
         // Update user's last claimed timestamp
-        if (user) {
-            user.lastClaimed = new Date();
-            await user.save();
-        } else {
-            await User.create({ ipAddress, lastClaimed: new Date() });
-        }
+        user.lastClaimed = new Date();
+        await user.save();
 
         res.json({ message: "Coupon claimed successfully!", coupon });
     } catch (error) {
+        console.error("Error claiming coupon:", error);
         res.status(500).json({ message: "Error claiming coupon" });
     }
 };
+
+
 
 module.exports = {
     getCoupons,
